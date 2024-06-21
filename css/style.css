@@ -1,0 +1,22 @@
+body {
+    background-color: #333;
+    color: #fff;
+    font-family: Arial, sans-serif;
+}
+
+.logo {
+    font-size: 3rem;
+    color: #28a745;
+    background: linear-gradient(90deg, #28a745, #34d058);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+canvas {
+    background-color: #000;
+    border: 1px solid #fff;
+}
+
+.score {
+    font-size: 1.5rem;
+}
