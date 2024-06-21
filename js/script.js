@@ -2,8 +2,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     const scoreElement = document.getElementById("score");
-    const pauseButton = document.getElementById("pauseButton");
+    const startPauseButton = document.getElementById("startPauseButton");
     const restartButton = document.getElementById("restartButton");
+    const teleportCheckbox = document.getElementById("teleportCheckbox");
 
     const canvasSize = 480;
     const blockSize = 20;
@@ -13,6 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let score;
     let isPaused;
     let gameLoop;
+    let teleportEnabled;
 
     // Inicializar variáveis do jogo
     function initGame() {
@@ -20,12 +22,13 @@ document.addEventListener("DOMContentLoaded", () => {
         direction = "RIGHT";
         food = generateFood();
         score = 0;
-        isPaused = false;
+        isPaused = true;
+        teleportEnabled = teleportCheckbox.checked;
         scoreElement.textContent = score;
-        pauseButton.textContent = "Pausar";
+        startPauseButton.textContent = "Iniciar";
         restartButton.classList.add("d-none");
         clearInterval(gameLoop);
-        gameLoop = setInterval(gameTick, 100);
+        draw();
     }
 
     // Generate random color
@@ -82,6 +85,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 break;
         }
 
+        // Check for teleport
+        if (teleportEnabled) {
+            if (head.x >= canvasSize) head.x = 0;
+            else if (head.x < 0) head.x = canvasSize - blockSize;
+            if (head.y >= canvasSize) head.y = 0;
+            else if (head.y < 0) head.y = canvasSize - blockSize;
+        }
+
         snake.unshift(head);
 
         // Check if the snake has eaten the food
@@ -94,7 +105,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // Check for collisions
-        if (head.x < 0 || head.x >= canvasSize || head.y < 0 || head.y >= canvasSize || isCollision(head)) {
+        if (!teleportEnabled && (head.x < 0 || head.x >= canvasSize || head.y < 0 || head.y >= canvasSize || isCollision(head))) {
+            clearInterval(gameLoop);
+            restartButton.classList.remove("d-none");
+            alert("Game Over! Your score: " + score);
+        } else if (isCollision(head)) {
             clearInterval(gameLoop);
             restartButton.classList.remove("d-none");
             alert("Game Over! Your score: " + score);
@@ -130,10 +145,15 @@ document.addEventListener("DOMContentLoaded", () => {
     // Toggle the pause state
     function togglePause() {
         isPaused = !isPaused;
-        pauseButton.textContent = isPaused ? "Continuar" : "Pausar";
+        startPauseButton.textContent = isPaused ? "Iniciar" : "Pausar";
+        if (!isPaused) {
+            gameLoop = setInterval(gameTick, 100);
+        } else {
+            clearInterval(gameLoop);
+        }
     }
 
-    pauseButton.addEventListener("click", togglePause);
+    startPauseButton.addEventListener("click", togglePause);
     restartButton.addEventListener("click", initGame);
 
     // Run game tick (draw and update)
